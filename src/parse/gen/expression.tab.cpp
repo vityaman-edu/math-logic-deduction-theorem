@@ -72,15 +72,13 @@
 #include <iostream>
 #include <string>
 #include "expression.h"
-#include "symbol_table.h"
 
 int yylex(void);
 void yyerror(const char *);
 
-symbol_table* table = new symbol_table();
-cached_expression* result = nullptr;
+expression* result = nullptr;
 
-#line 84 "src/parse/gen/expression.tab.cpp"
+#line 82 "src/parse/gen/expression.tab.cpp"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -508,7 +506,7 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int8 yyrline[] =
 {
-       0,    35,    35,    39,    40,    41,    42,    43,    44
+       0,    33,    33,    37,    38,    39,    40,    41,    42
 };
 #endif
 
@@ -1070,51 +1068,49 @@ yyreduce:
   switch (yyn)
     {
   case 2: /* Input: Expression  */
-#line 35 "src/parse/expression.y"
+#line 33 "src/parse/expression.y"
                  { result = (yyvsp[0].e); }
-#line 1076 "src/parse/gen/expression.tab.cpp"
+#line 1074 "src/parse/gen/expression.tab.cpp"
     break;
 
   case 3: /* Expression: Expression IMP Expression  */
-#line 39 "src/parse/expression.y"
+#line 37 "src/parse/expression.y"
                                 { (yyval.e) = new implication((yyvsp[-2].e), (yyvsp[0].e)); }
-#line 1082 "src/parse/gen/expression.tab.cpp"
+#line 1080 "src/parse/gen/expression.tab.cpp"
     break;
 
   case 4: /* Expression: Expression OR Expression  */
-#line 40 "src/parse/expression.y"
+#line 38 "src/parse/expression.y"
                                 { (yyval.e) = new disjunction((yyvsp[-2].e), (yyvsp[0].e)); }
-#line 1088 "src/parse/gen/expression.tab.cpp"
+#line 1086 "src/parse/gen/expression.tab.cpp"
     break;
 
   case 5: /* Expression: Expression AND Expression  */
-#line 41 "src/parse/expression.y"
+#line 39 "src/parse/expression.y"
                                 { (yyval.e) = new conjunction((yyvsp[-2].e), (yyvsp[0].e)); }
-#line 1094 "src/parse/gen/expression.tab.cpp"
+#line 1092 "src/parse/gen/expression.tab.cpp"
     break;
 
   case 6: /* Expression: NEG Expression  */
-#line 42 "src/parse/expression.y"
+#line 40 "src/parse/expression.y"
                                 { (yyval.e) = new negation((yyvsp[0].e));        }
-#line 1100 "src/parse/gen/expression.tab.cpp"
+#line 1098 "src/parse/gen/expression.tab.cpp"
     break;
 
   case 7: /* Expression: LEFT Expression RIGHT  */
-#line 43 "src/parse/expression.y"
+#line 41 "src/parse/expression.y"
                                 { (yyval.e) = (yyvsp[-1].e);                      }
-#line 1106 "src/parse/gen/expression.tab.cpp"
+#line 1104 "src/parse/gen/expression.tab.cpp"
     break;
 
   case 8: /* Expression: NAME  */
-#line 44 "src/parse/expression.y"
-           { 
-        (yyval.e) = new variable(table->entry_for_identifier(*(yyvsp[0].name)));
-    }
-#line 1114 "src/parse/gen/expression.tab.cpp"
+#line 42 "src/parse/expression.y"
+                                { (yyval.e) = new variable(*(yyvsp[0].name));       }
+#line 1110 "src/parse/gen/expression.tab.cpp"
     break;
 
 
-#line 1118 "src/parse/gen/expression.tab.cpp"
+#line 1114 "src/parse/gen/expression.tab.cpp"
 
       default: break;
     }
@@ -1307,5 +1303,5 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 49 "src/parse/expression.y"
+#line 45 "src/parse/expression.y"
 

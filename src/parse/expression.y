@@ -2,17 +2,15 @@
 #include <iostream>
 #include <string>
 #include "expression.h"
-#include "symbol_table.h"
 
 int yylex(void);
 void yyerror(const char *);
 
-symbol_table* table = new symbol_table();
-cached_expression* result = nullptr;
+expression* result = nullptr;
 %}
 
 %union {    
-cached_expression* e;
+expression* e;
 std::string* name;
 }
 
@@ -41,9 +39,7 @@ Expression
     | Expression AND Expression { $$ = new conjunction($1, $3); }
     | NEG Expression            { $$ = new negation($2);        }
     | LEFT Expression RIGHT     { $$ = $2;                      }
-    | NAME { 
-        $$ = new variable(table->entry_for_identifier(*$1));
-    }
+    | NAME                      { $$ = new variable(*$1);       }
     ;
 
 %%

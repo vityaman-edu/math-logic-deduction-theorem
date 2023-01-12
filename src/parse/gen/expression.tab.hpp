@@ -70,9 +70,9 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 14 "src/parse/expression.y"
+#line 12 "src/parse/expression.y"
     
-cached_expression* e;
+expression* e;
 std::string* name;
 
 #line 79 "src/parse/gen/expression.tab.hpp"
