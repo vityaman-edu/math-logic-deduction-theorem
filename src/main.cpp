@@ -19,13 +19,17 @@ int yywrap() {
 }
 
 void read_input() {
-    std::string input = 
+    std::string input =
     "A, (A & B), (C | M) |- (A -> D) \n"
     "A \n"
     "LALA \n"
     "LEND -> A \n"
     "A->B->A \n"
-    "C&C|M->B->C&C|M \n";
+    "C&C|M->B->C&C|M \n"
+    "!!A -> A \n"
+    "!!A -> !A \n"
+    "A -> A | B \n"
+    "B -> A \n";
     // std::cin >> input;
 
     yy_scan_string(input.c_str());
@@ -40,7 +44,7 @@ int main() {
 
     axiom_matcher matcher;
 
-    std::cout << "Context:" << std::endl;
+    std::cout << std::endl << "Context:" << std::endl;
     for (auto& expr : context) {
         std::cout << expr->as_string() << std::endl;
     }
