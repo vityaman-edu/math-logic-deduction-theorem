@@ -21,6 +21,7 @@ public:
     }
 
     virtual std::string as_string() = 0;
+    virtual bool is_equal_to(const expression& other) const = 0;
     virtual ~expression() {};
 
 private:
@@ -45,6 +46,16 @@ public:
             + _left->as_string() + "," 
             + _right->as_string() 
             + ")";
+    }
+
+    bool is_equal_to(const expression& other) const override {
+        if (other.type() != this->type()) {
+            return false;
+        }
+        const binary_operation& that 
+            = static_cast<const binary_operation&>(other);
+        return _left->is_equal_to(*that._left)
+            && _right->is_equal_to(*that._right);
     }
 
 private:
@@ -88,6 +99,15 @@ public:
             + ")";
     }
 
+    bool is_equal_to(const expression& other) const override {
+        if (other.type() != this->type()) {
+            return false;
+        }
+        const unary_operation& that 
+            = static_cast<const unary_operation&>(other);
+        return _child->is_equal_to(*that._child);
+    }
+
 private:
     std::string _symbol;
     expression* _child;
@@ -107,6 +127,15 @@ public:
 
     inline std::string as_string() override {
         return _name;
+    }
+
+    bool is_equal_to(const expression& other) const override {
+        if (other.type() != this->type()) {
+            return false;
+        }
+        const variable& that 
+            = static_cast<const variable&>(other);
+        return _name == that._name;
     }
 
 private:

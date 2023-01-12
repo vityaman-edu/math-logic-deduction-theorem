@@ -13,14 +13,20 @@ int yywrap() {
     return 1;
 }
 
-int main() {
+expression* input_expression() {
     std::string input;
     std::cin >> input;
     yy_scan_string(input.c_str());
     yyparse();
+    return result;
+}
+
+int main() {
+    const expression* a = input_expression();
+    const expression* b = input_expression();
 
     std::cout 
-        << result->as_string()
+        << a->is_equal_to(*b)
         << std::endl;
 
     return 0;
