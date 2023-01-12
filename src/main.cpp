@@ -10,7 +10,7 @@ extern std::vector<expression*> proof;
 extern expression* result;
 
 void yyerror(const char *error) {
-    //std::cerr << error;
+    std::cerr << error;
 }
 
 int yywrap() {
@@ -24,7 +24,7 @@ void read_input() {
     "LALA \n"
     "LEND -> A\n";
     // std::cin >> input;
-    
+
     yy_scan_string(input.c_str());
     yyparse();
 

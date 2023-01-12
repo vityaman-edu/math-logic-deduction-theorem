@@ -39,19 +39,15 @@ Input
     ;
 
 Context
-    : Expression ContextTail       { context.push_back($1);        }
-    ;
-
-ContextTail            
-    : COMMA Expression ContextTail { context.push_back($2);        }
-    | /* EPS */
+    : Expression                   { context.push_back($1);    }
+    | Expression COMMA Context     { context.push_back($1);    }
     ;
 
 Proof
     : Expression END               { proof.push_back($1);      }
     | Expression END Proof         { proof.push_back($1);      }
     ;
-    
+
 Expression
     : Expression IMP Expression    { $$ = new implication($1, $3); }
     | Expression OR Expression     { $$ = new disjunction($1, $3); }
