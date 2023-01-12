@@ -1,15 +1,18 @@
 %{
 #include <iostream>
 #include <string>
+#include <vector>
 #include "expression.h"
 
 int yylex(void);
 void yyerror(const char *);
 
+std::vector<expression*> context;
+std::vector<expression*> proof;
 expression* result = nullptr;
 %}
 
-%union {    
+%union {
 expression* e;
 std::string* name;
 }
@@ -18,6 +21,8 @@ std::string* name;
 %token IMP OR AND NEG
 %token LEFT RIGHT
 %token END
+%token COMMA
+%token DEDUCE
 
 %right IMP
 %left OR
@@ -30,16 +35,30 @@ std::string* name;
 
 %%
 Input
-    : Expression { result = $1; }
+    : Context DEDUCE Expression END Proof { result = $3; }
     ;
 
+Context
+    : Expression ContextTail       { context.push_back($1);        }
+    ;
+
+ContextTail            
+    : COMMA Expression ContextTail { context.push_back($2);        }
+    | /* EPS */
+    ;
+
+Proof
+    : Expression END               { proof.push_back($1);      }
+    | Expression END Proof         { proof.push_back($1);      }
+    ;
+    
 Expression
-    : Expression IMP Expression { $$ = new implication($1, $3); }
-    | Expression OR Expression  { $$ = new disjunction($1, $3); }
-    | Expression AND Expression { $$ = new conjunction($1, $3); }
-    | NEG Expression            { $$ = new negation($2);        }
-    | LEFT Expression RIGHT     { $$ = $2;                      }
-    | NAME                      { $$ = new variable(*$1);       }
+    : Expression IMP Expression    { $$ = new implication($1, $3); }
+    | Expression OR Expression     { $$ = new disjunction($1, $3); }
+    | Expression AND Expression    { $$ = new conjunction($1, $3); }
+    | NEG Expression               { $$ = new negation($2);        }
+    | LEFT Expression RIGHT        { $$ = $2;                      }
+    | NAME                         { $$ = new variable(*$1);       }
     ;
 
 %%

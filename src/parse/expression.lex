@@ -23,4 +23,6 @@ symbol {letter}({letter}|{digit})*
 "("  return LEFT;
 ")"  return RIGHT;
 "\n" return END;
+","  return COMMA;
+"|-" return DEDUCE;
 %%
