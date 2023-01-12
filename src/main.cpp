@@ -43,6 +43,9 @@ int main() {
     read_input();
 
     axiom_matcher matcher;
+    for (auto& expr : context) {
+        matcher.add_assumption(expr);
+    }
 
     std::cout << std::endl << "Context:" << std::endl;
     for (auto& expr : context) {

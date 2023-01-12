@@ -2,6 +2,7 @@
 #define DEDUCTION_THEOREM_AXIOM_MATCHER_H
 
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 #include "expression.h"
 
@@ -11,11 +12,11 @@ public:
         place* a = p(1);
         place* b = p(2);
         place* c = p(3);
-        axioms.emplace_back(
+        _axioms.emplace_back(
             // (1) a -> (b -> a)
             impl(a, impl(b, a))
         );
-        axioms.emplace_back(
+        _axioms.emplace_back(
             // (2) (a -> b) -> ((a -> (b -> c)) -> (a -> c))
             impl(
                 impl(a, b),
@@ -25,54 +26,59 @@ public:
                 )
             )
         );
-        axioms.emplace_back(
+        _axioms.emplace_back(
             // (3) a -> (b -> (a & b))
             impl(a, impl(b, conj(a, b)))
         );
-        axioms.emplace_back(
+        _axioms.emplace_back(
             // (4) (a & b) -> a
             impl(conj(a, b), a)
         );
-        axioms.emplace_back(
+        _axioms.emplace_back(
             // (5) (a & b) -> b
             impl(conj(a, b), b)
         );
-        axioms.emplace_back(
+        _axioms.emplace_back(
             // (6) a -> (a | b)
             impl(a, disj(a, b))
         );
-        axioms.emplace_back(
+        _axioms.emplace_back(
             // (7) b -> (a | b)
             impl(b, disj(a, b))
         );
-        axioms.emplace_back(
+        _axioms.emplace_back(
             // (8) (a -> c) -> ((b -> c) -> ((a | b) -> c))
             impl(
                 impl(a, c),
                 impl(impl(b, c), impl(disj(a, b), c))
             )
         );
-        axioms.emplace_back(
+        _axioms.emplace_back(
             // (9) (a -> b) -> ((a -> !b) -> !a)
             impl(
                 impl(a, b),
                 impl(impl(a, neg(b)), neg(a))
             )
         );
-        axioms.emplace_back(
+        _axioms.emplace_back(
             // (10) !!a -> a
             impl(neg(neg(a)), a)
         );
     }
 
     bool is_axiom(expression* expression) {
-        for (auto& axiom : axioms) {
+        for (auto& axiom : _axioms) {
             _table.clear();
             if (axiom->is_equal_to(expression)) {
                 return true;
             }
         }
         return false;
+    }
+
+    void add_assumption(expression* expression) {
+        // TODO: optimize for const expressions
+        _axioms.emplace_back(expression);
     }
 
 private:
@@ -96,7 +102,7 @@ private:
         return new negation(c);
     }
 
-    std::vector<expression*> axioms;
+    std::vector<expression*> _axioms;
     std::unordered_map<int, expression*> _table;
 };
 
