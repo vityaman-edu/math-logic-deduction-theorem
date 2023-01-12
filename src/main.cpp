@@ -1,4 +1,5 @@
 #include "expression.h"
+#include "axiom_matcher.h"
 #include "parse/gen/expression.tab.hpp"
 #include "parse/gen/expression.lexer.hpp"
 #include <iostream>
@@ -22,7 +23,9 @@ void read_input() {
     "A, (A & B), (C | M) |- (A -> D) \n"
     "A \n"
     "LALA \n"
-    "LEND -> A\n";
+    "LEND -> A \n"
+    "A->B->A \n"
+    "C&C|M->B->C&C|M \n";
     // std::cin >> input;
 
     yy_scan_string(input.c_str());
@@ -35,6 +38,8 @@ void read_input() {
 int main() {
     read_input();
 
+    axiom_matcher matcher;
+
     std::cout << "Context:" << std::endl;
     for (auto& expr : context) {
         std::cout << expr->as_string() << std::endl;
@@ -44,7 +49,10 @@ int main() {
 
     std::cout << "Proof:" << std::endl;
     for (auto& expr : proof) {
-        std::cout << expr->as_string() << std::endl;
+        std::cout 
+            << expr->as_string() 
+            << " is axiom: " << matcher.is_axiom(expr) 
+            << std::endl;
     }
 
     return 0;

@@ -1,27 +1,33 @@
 #ifndef EXPRESSION_TRUTHFULNESS_EXPRESSION_H
 #define EXPRESSION_TRUTHFULNESS_EXPRESSION_H
 
+#include "debug.h"
 #include <string>
+#include <unordered_map>
 
 enum expression_type {
     IMPLICATION,
     DISJUNCTION,
     CONJUNCTION,
     NEGATION,
-    VARIABLE
+    VARIABLE,
+    PLACE
 };
+
+class binary_operation;
+class unary_operation;
 
 class expression {
 public:
     expression(expression_type type)
         : _type(type) {}
 
-    expression_type type() const {
-        return _type;
-    }
+    expression_type type();
+    binary_operation* as_binary();
+    unary_operation* as_unary();
 
     virtual std::string as_string() = 0;
-    virtual bool is_equal_to(const expression& other) const = 0;
+    virtual bool is_equal_to(expression* other) = 0;
     virtual ~expression() {};
 
 private:
@@ -48,14 +54,22 @@ public:
             + ")";
     }
 
-    bool is_equal_to(const expression& other) const override {
-        if (other.type() != this->type()) {
+    bool is_equal_to(expression* other) override {
+        if (other->type() != type()) {
             return false;
         }
-        const binary_operation& that 
-            = static_cast<const binary_operation&>(other);
-        return _left->is_equal_to(*that._left)
-            && _right->is_equal_to(*that._right);
+        binary_operation* that 
+            = static_cast<binary_operation*>(other);
+        return _left->is_equal_to(that->_left)
+            && _right->is_equal_to(that->_right);
+    }
+
+    expression* left() {
+        return _left;
+    }
+
+    expression* right() {
+        return _right;
     }
 
 private:
@@ -85,7 +99,7 @@ public:
 class unary_operation : public expression {
 public:
     unary_operation(
-        std::string const & symbol, 
+        const std::string & symbol, 
         expression_type type,
         expression* child
     ) : expression(type),
@@ -99,13 +113,17 @@ public:
             + ")";
     }
 
-    bool is_equal_to(const expression& other) const override {
-        if (other.type() != this->type()) {
+    bool is_equal_to(expression* other) override {
+        if (other->type() != type()) {
             return false;
         }
-        const unary_operation& that 
-            = static_cast<const unary_operation&>(other);
-        return _child->is_equal_to(*that._child);
+        unary_operation* that 
+            = static_cast<unary_operation*>(other);
+        return _child->is_equal_to(that->_child);
+    }
+
+    expression* child() {
+        return _child;
     }
 
 private:
@@ -121,7 +139,7 @@ public:
 
 class variable : public expression {
 public:
-    variable(const std::string& name)
+    variable(std::string& name)
         : expression(VARIABLE),
           _name(name) {}
 
@@ -129,17 +147,46 @@ public:
         return _name;
     }
 
-    bool is_equal_to(const expression& other) const override {
-        if (other.type() != this->type()) {
+    bool is_equal_to(expression* other) override {
+        if (other->type() != type()) {
             return false;
         }
-        const variable& that 
-            = static_cast<const variable&>(other);
-        return _name == that._name;
+        variable* that 
+            = static_cast<variable*>(other);
+        return _name == that->_name;
     }
 
 private:
     std::string _name;
+};
+
+class place : public expression {
+public:
+    place(int id, std::unordered_map<int, expression*>& table)
+        : expression(PLACE),
+          _id(id), 
+          _table(&table) {}
+
+    inline std::string as_string() override {
+        auto e = _table->find(_id);
+        if (e == _table->end()) {
+            return "$";
+        }
+        return e->second->as_string();
+    }
+
+    bool is_equal_to(expression* other) override {
+        auto e = _table->find(_id);
+        if (e == _table->end()) {
+            _table->insert({ _id, other });
+            return true;
+        }
+        return e->second->is_equal_to(other);
+    }
+    
+private:
+    int _id;
+    std::unordered_map<int, expression*>* _table;
 };
 
 #endif

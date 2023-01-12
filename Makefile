@@ -2,7 +2,7 @@ CXXFLAGS=-std=c++14 -Wall -O2 -I src
 CXX=g++
 GR_DIR=src/parse
 BISON_GEN_DIR=$(GR_DIR)/gen
-SRCS=src/main.cpp
+SRCS=src/main.cpp src/expression.cpp
 TARGET_NAME=deduction_theorem.zip
 
 all: build
