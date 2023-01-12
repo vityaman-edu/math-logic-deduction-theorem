@@ -1,7 +1,6 @@
 #ifndef EXPRESSION_TRUTHFULNESS_EXPRESSION_H
 #define EXPRESSION_TRUTHFULNESS_EXPRESSION_H
 
-#include "debug.h"
 #include <string>
 #include <unordered_map>
 
@@ -47,9 +46,9 @@ public:
         _right(right) {}
 
     std::string as_string() override {
-        return "(" 
-            + _symbol + "," 
-            + _left->as_string() + "," 
+        return "("
+            + _left->as_string() 
+            + _symbol
             + _right->as_string() 
             + ")";
     }
@@ -108,7 +107,7 @@ public:
 
     inline std::string as_string() override {
         return "(" 
-            + _symbol 
+            + _symbol
             + _child->as_string() 
             + ")";
     }
@@ -139,7 +138,7 @@ public:
 
 class variable : public expression {
 public:
-    variable(std::string& name)
+    variable(const std::string& name)
         : expression(VARIABLE),
           _name(name) {}
 

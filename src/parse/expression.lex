@@ -6,7 +6,7 @@
 
 %option outfile="lex.cpp" header-file="lex.hpp"
 
-white [ \t]+
+white [ \r\t]+
 digit [0-9]
 letter [A-Z`'’]
 symbol {letter}({letter}|{digit})*

@@ -19,18 +19,12 @@ int yywrap() {
 }
 
 void read_input() {
-    std::string input =
-    "A, (A & B), (C | M) |- (A -> D) \n"
-    "A \n"
-    "LALA \n"
-    "LEND -> A \n"
-    "A->B->A \n"
-    "C&C|M->B->C&C|M \n"
-    "!!A -> A \n"
-    "!!A -> !A \n"
-    "A -> A | B \n"
-    "B -> A \n";
-    // std::cin >> input;
+    std::string input;
+
+    std::string line;
+    while (std::getline(std::cin, line)) {
+        input += line + '\n';
+    }
 
     yy_scan_string(input.c_str());
     yyparse();
@@ -42,24 +36,98 @@ void read_input() {
 int main() {
     read_input();
 
+    expression* alpha = context[context.size() - 1];
+
     axiom_matcher matcher;
-    for (auto& expr : context) {
-        matcher.add_assumption(expr);
+
+    for (size_t i = 0; i < context.size() - 1; ++i) {
+        matcher.add_assumption(context[i]);
     }
 
-    std::cout << std::endl << "Context:" << std::endl;
-    for (auto& expr : context) {
-        std::cout << expr->as_string() << std::endl;
+    std::string alpha_str = alpha->as_string();
+
+    for (int i = 0; i < (int)context.size() - 2; ++i) {
+        std::cout << context[i]->as_string() << ",";
     }
+    if (context.size() > 1) {
+        std::cout << context[context.size() - 2]->as_string();
+    }
+    std::cout 
+        << "|-" 
+        << alpha_str
+        << "->" 
+        << result->as_string()
+        << std::endl;
 
-    std::cout << "Result: " << result->as_string() << std::endl;
+    std::string a = alpha_str;
+    for (size_t i = 0; i < proof.size(); ++i) {
+        auto statement = proof[i];
+        std::string st = statement->as_string();
+        if (matcher.is_axiom(statement)) {
+            std::cout 
+                << st << "->" << "(" << a << "->" << st << ")"
+                << std::endl;
+            std::cout 
+                << st
+                << std::endl;
+        } else if (statement->is_equal_to(alpha)) {
+            std::cout 
+                << a << "->" << "(" << a << "->" << a << ")"
+                << std::endl;
+            std::cout
+                << "(" << a << "->(" << a << "->" << a << "))"
+                << "->"
+                << "(" << a << "->(" 
+                    << "(" << a << "->" << a << ")" 
+                    << "->" << a
+                << "))"
+                << "->" << "(" << a << "->" << a << ")"
+                << std::endl;
+            std::cout 
+                << "(" << a << "->" 
+                    << "(" << a << "->" << a << ")" 
+                    << "->" << a
+                << ")"
+                << "->" << "(" << a << "->" << a << ")"
+                << std::endl;
+            std::cout 
+                << a << "->" 
+                    << "(" << a << "->" << a << ")" 
+                << "->" << a
+                << std::endl;
+        } else {
+            std::vector<implication*> impls;
+            for (size_t j = 0; j < i; ++j) {
+                if (proof[j]->type() == IMPLICATION) {
+                    auto impl = static_cast<implication*>(proof[j]);
+                    if (impl->right()->is_equal_to(statement)) {
+                        impls.push_back(impl);
+                    }
+                }
+            }
 
-    std::cout << "Proof:" << std::endl;
-    for (auto& expr : proof) {
-        std::cout 
-            << expr->as_string() 
-            << " is axiom: " << matcher.is_axiom(expr) 
-            << std::endl;
+            expression* left = new variable("A");
+            for (size_t k = 0; k < impls.size(); ++k) {
+                for (size_t j = 0; j < i; ++j) {
+                    if (impls[k]->left()->is_equal_to(proof[j])) {
+                        left = proof[j];
+                        break;
+                    }
+                }
+            }
+            
+            std::string l = left->as_string();
+            std::cout
+                << "(" << a << "->" << l << ")->(" 
+                << a << "->(" << l << "->" << st << "))"
+                << "->(" << a << "->" << st << ")"
+                << std::endl;
+            std::cout 
+                << "(" << a << "->(" << l << "->" << st << "))"
+                << "->(" << a << "->" << st << ")"
+                << std::endl;
+        }
+        std::cout << alpha_str << "->" << st << std::endl;
     }
 
     return 0;
