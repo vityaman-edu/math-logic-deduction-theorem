@@ -18,22 +18,68 @@ int yywrap() {
     return 1;
 }
 
+bool is_blank(const std::string& s) {
+    for (size_t i = 0; i < s.length(); ++i) {
+        if (!std::isspace(s[i])) {
+            return false;
+        }
+    }
+    return true;
+}
+
 void read_input() {
     std::string input;
 
     std::string line;
     while (std::getline(std::cin, line)) {
-        input += line + '\n';
+        if (!is_blank(line)) {
+            input += line + '\n';
+        }
     }
 
+    // std::cout << input << std::endl;
+
+    
     yy_scan_string(input.c_str());
     yyparse();
+    
 
     std::reverse(context.begin(), context.end());
     std::reverse(proof.begin(), proof.end());
 }
 
+void case_is_axiom(const std::string& st, const std::string& a) {
+    std::cout 
+        << st + "->(" + a + "->" + st + ")" 
+        << std::endl;
+    std::cout 
+        << "(" + st + ")"
+        << std::endl;
+}
+
+void case_is_equal_to_a(const std::string& st, const std::string& a) {
+    const std::string a_impl_a = "(" + a + "->" + a + ")";
+    std::cout 
+        << a + "->" + a_impl_a
+        << std::endl;
+    std::cout
+        << "(" + a + "->" + a_impl_a +")"
+         + "->"
+         + "(" + a + "->(" + a_impl_a + "->" + a + "))"
+         + "->" + a_impl_a
+        << std::endl;
+    std::cout 
+        << "(" + a + "->" + a_impl_a + "->" + a + ")->" + a_impl_a
+        << std::endl;
+    std::cout 
+        << a + "->" + a_impl_a + "->" + a
+        << std::endl;
+}
+
 int main() {
+    //freopen("res/output.txt", "w", stdout);
+    //freopen("res/input.txt",  "r", stdin );
+
     read_input();
 
     expression* alpha = context[context.size() - 1];
@@ -52,11 +98,8 @@ int main() {
     if (context.size() > 1) {
         std::cout << context[context.size() - 2]->as_string();
     }
-    std::cout 
-        << "|-" 
-        << alpha_str
-        << "->" 
-        << result->as_string()
+    std::cout
+        << "|-(" + alpha_str + "->(" + result->as_string() + "))"
         << std::endl;
 
     std::string a = alpha_str;
@@ -64,37 +107,9 @@ int main() {
         auto statement = proof[i];
         std::string st = statement->as_string();
         if (matcher.is_axiom(statement)) {
-            std::cout 
-                << st << "->" << "(" << a << "->" << st << ")"
-                << std::endl;
-            std::cout 
-                << st
-                << std::endl;
+            case_is_axiom(st, a);
         } else if (statement->is_equal_to(alpha)) {
-            std::cout 
-                << a << "->" << "(" << a << "->" << a << ")"
-                << std::endl;
-            std::cout
-                << "(" << a << "->(" << a << "->" << a << "))"
-                << "->"
-                << "(" << a << "->(" 
-                    << "(" << a << "->" << a << ")" 
-                    << "->" << a
-                << "))"
-                << "->" << "(" << a << "->" << a << ")"
-                << std::endl;
-            std::cout 
-                << "(" << a << "->" 
-                    << "(" << a << "->" << a << ")" 
-                    << "->" << a
-                << ")"
-                << "->" << "(" << a << "->" << a << ")"
-                << std::endl;
-            std::cout 
-                << a << "->" 
-                    << "(" << a << "->" << a << ")" 
-                << "->" << a
-                << std::endl;
+            case_is_equal_to_a(st, a);
         } else {
             std::vector<implication*> impls;
             for (size_t j = 0; j < i; ++j) {
@@ -117,17 +132,21 @@ int main() {
             }
             
             std::string l = left->as_string();
+            // (a -> l) -> ((a -> (l -> st)) -> (a -> st))
             std::cout
-                << "(" << a << "->" << l << ")->(" 
-                << a << "->(" << l << "->" << st << "))"
-                << "->(" << a << "->" << st << ")"
+                << "(" + a + "->" + l + ")" 
+                + "->((" + a + "->(" + l + "->" + st + "))"
+                + "->(" + a + "->" + st + "))"
                 << std::endl;
+            // (a -> (l -> st)) -> (a -> st)
             std::cout 
-                << "(" << a << "->(" << l << "->" << st << "))"
-                << "->(" << a << "->" << st << ")"
+                << "(" + a + "->(" + l + "->" + st + "))"
+                + "->(" + a + "->" + st + ")"
                 << std::endl;
         }
-        std::cout << alpha_str << "->" << st << std::endl;
+        std::cout 
+            << "(" + alpha_str << "->" << st  + ")" 
+            << std::endl;
     }
 
     return 0;
