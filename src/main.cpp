@@ -1,4 +1,5 @@
 #include "expression.h"
+#include "parsing.h"
 #include "axiom_matcher.h"
 #include "parse/gen/expression.tab.hpp"
 #include "parse/gen/expression.lexer.hpp"
@@ -8,15 +9,7 @@
 
 extern std::vector<expression*> context;
 extern std::vector<expression*> proof;
-extern expression* result;
-
-void yyerror(const char *error) {
-    std::cerr << error;
-}
-
-int yywrap() {
-    return 1;
-}
+expression* res;
 
 bool is_blank(const std::string& s) {
     for (size_t i = 0; i < s.length(); ++i) {
@@ -28,24 +21,14 @@ bool is_blank(const std::string& s) {
 }
 
 void read_input() {
-    std::string input;
-
     std::string line;
+    std::getline(std::cin, line);
+    parse_header(line, context, res);
     while (std::getline(std::cin, line)) {
         if (!is_blank(line)) {
-            input += line + '\n';
+            proof.push_back(parse_expression(line));
         }
     }
-
-    // std::cout << input << std::endl;
-
-    
-    yy_scan_string(input.c_str());
-    yyparse();
-    
-
-    std::reverse(context.begin(), context.end());
-    std::reverse(proof.begin(), proof.end());
 }
 
 void case_is_axiom(const std::string& st, const std::string& a) {
@@ -77,8 +60,8 @@ void case_is_equal_to_a(const std::string& st, const std::string& a) {
 }
 
 int main() {
-    //freopen("res/output.txt", "w", stdout);
-    //freopen("res/input.txt",  "r", stdin );
+    // freopen("res/output.txt", "w", stdout);
+    // freopen("res/input.txt",  "r", stdin );
 
     read_input();
 
@@ -99,7 +82,7 @@ int main() {
         std::cout << context[context.size() - 2]->as_string();
     }
     std::cout
-        << "|-(" + alpha_str + "->(" + result->as_string() + "))"
+        << "|-(" + alpha_str + "->(" + res->as_string() + "))"
         << std::endl;
 
     std::string a = alpha_str;

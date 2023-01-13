@@ -31,11 +31,15 @@ std::string* name;
 
 %type <e> Input Expression
 
-%start Input
+%start InputExpression
 
 %%
 Input
     : Context DEDUCE Expression END Proof { result = $3; }
+    ;
+
+InputExpression
+    : Expression { result = $1; }
     ;
 
 Context
