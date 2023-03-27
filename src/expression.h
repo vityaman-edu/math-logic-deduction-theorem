@@ -21,11 +21,14 @@ public:
     expression(expression_type type)
         : _type(type) {}
 
+    // don't need
     expression_type type();
     binary_operation* as_binary();
     unary_operation* as_unary();
 
     virtual std::string as_string() = 0;
+
+    // A -> A
     virtual bool is_equal_to(expression* other) = 0;
     virtual ~expression() {};
 
@@ -47,12 +50,38 @@ public:
 
     std::string as_string() override {
         return "("
-            + _left->as_string() 
-            + _symbol
-            + _right->as_string() 
-            + ")";
+            + _left->as_string() // A & B
+            + _symbol // &, |, ->
+            + _right->as_string() // C
+            + ")"; // (A & B) -> (C)
     }
 
+    /*
+        class And extends Expression {
+            ...
+
+            public String asString() {
+                return "("
+                    + left.asString()
+                    + " & "
+                    + right.asString()
+                    + ")";
+            }
+
+            ...
+
+            public bool mathes(Expression expression) {
+                if (expression.getClass() != getClass()) {
+                    return false;
+                }
+                And that = (And) expression;
+                return this.left.mathes(that.left)
+                    && this.right.mathes(that.right);
+            }
+
+            ...
+        }
+    */
     bool is_equal_to(expression* other) override {
         if (other->type() != type()) {
             return false;
@@ -146,6 +175,29 @@ public:
         return _name;
     }
 
+    /*
+        class Variable extends Expression {
+            ...
+
+            public String asString() {
+                return this.name;
+            }
+
+            // (A -> A) != (B -> B) != ((A -> A) -> (A -> A))
+            // we want sometimes 
+            //   (A -> A).matches(((A -> A) -> (A -> A)))
+            //   == true in case of (A -> A) is axiom
+            public bool matches(Expression other) {
+                if (expression.getClass() != getClass()) {
+                    return false;
+                }
+                Variable that = (Variable) other;
+                return this.name.equals(other.name);
+            }
+
+            ...
+        }
+    */
     bool is_equal_to(expression* other) override {
         if (other->type() != type()) {
             return false;
@@ -161,11 +213,50 @@ private:
 
 class place : public expression {
 public:
+    /*
+        class Table {
+             = MAX_AXIOM_VAR_COUNT
+            Expression[] table = new Expression[N];
+            table[i] == null initially
+
+            bool contains(int i) {
+                return table[i] != null;
+            }
+
+            Expression get(int i) {
+                return table[i]; // nullable
+            }
+
+            void set(int i, Expression e) {
+                table[i] = e;
+            }
+
+            void clear() {
+                for (int i = 0; i < N; i++) {
+                    table[i] = null;
+                }
+            }
+        }
+
+        class Place {
+            Table table;
+            int id;
+        }
+    */
     place(int id, std::unordered_map<int, expression*>& table)
         : expression(PLACE),
           _id(id), 
           _table(&table) {}
 
+    /*
+        String asString() {
+            if (table.contains(id)) {
+                return table.get(id).asString();
+            } else {
+                return "$";
+            }
+        }
+    */
     inline std::string as_string() override {
         auto e = _table->find(_id);
         if (e == _table->end()) {
@@ -174,6 +265,16 @@ public:
         return e->second->as_string();
     }
 
+    /*
+        bool matches(Expression other) {
+            if (table.contains(id)) {
+                return table.get(id).matches(other);
+            } else {
+                table.set(id, other);
+                return true;
+            }
+        }
+    */
     bool is_equal_to(expression* other) override {
         auto e = _table->find(_id);
         if (e == _table->end()) {

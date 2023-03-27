@@ -17,12 +17,38 @@ int yywrap() {
     return 1;
 }
 
+// Your f: String -> Expression
 expression* parse_expression(const std::string& src) {
     yy_scan_string(src.c_str());
     yyparse();
     return result;
 }
 
+/*
+    E1, E2, E3, E4, Alpha |- Result
+    ...
+    class Header {
+        Collection<Expression> assumptions;
+        Expression result;
+
+        static Header parse(String text) {
+            "  E1, E2,  E3, E4, Alpha  " |- " Result  "
+            String[] assumptionsAndResult = text.split("|-");
+            String assumptionsString = assumptionsAndResult[0];
+            String resultString = assumptionsAndResult[1];
+            String[] assumptionStrings = assumptionsString.split(",");
+
+            List<Expression> assumptions = new ArrayList<>();
+            for (String assumptionString : assumptionStrings) {
+                assumptions.add(parseExpression(assumptionString));
+            }
+
+            Expression result = parseExpression(resultString);
+
+            return Header(assumptions, result);
+        }
+    }
+*/
 void parse_header(
     const std::string& src, 
     std::vector<expression*>& assumptions,
@@ -43,3 +69,4 @@ void parse_header(
 }
 
 
+;

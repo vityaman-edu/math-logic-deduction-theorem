@@ -6,6 +6,37 @@
 #include <vector>
 #include "expression.h"
 
+/*
+    class AxiomMatcher {
+        Table table = new Table();
+
+        Place a = new Place(1, table);
+        Place b = new Place(2, table);
+        Place c = new Place(3, table);
+
+        Collection<Expression> axioms = new ArrayList<>(List.of(
+            // (1) a -> (b -> a)
+            new Implication(a, new Implication(b, a)),
+            ...
+        )); // 11 axioms and expressions from 'Г'
+
+        Collection<Expression> assumptions; 
+
+        AxiomMatcher(...) { ... }
+
+        ...
+
+        bool isAxiomOrAssumption(Expression expression) {
+            for (Expression axiom : axioms) {
+                table.clean();
+                if (axiom.matches(expression)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+*/
 class axiom_matcher {
 public:
     axiom_matcher() {
